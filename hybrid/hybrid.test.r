@@ -1,6 +1,6 @@
 println("Testing...")
 println("Reading test data...")
-data = read.table("nsltest.txt", sep="," ,
+data = read.table("corrected", sep="," ,
                   col.names=c("duration","protocol_type","service","flag","src_bytes","dst_bytes",
                               "land","wrong_fragment","urgent","hot","num_failed_logins","logged_in",
                               "num_compromised","root_shell","su_attempted","num_root","num_file_creations",
@@ -11,7 +11,7 @@ data = read.table("nsltest.txt", sep="," ,
                               "dst_host_same_srv_rate","dst_host_diff_srv_rate",
                               "dst_host_same_src_port_rate","dst_host_srv_diff_host_rate",
                               "dst_host_serror_rate","dst_host_srv_serror_rate","dst_host_rerror_rate",
-                              "dst_host_srv_rerror_rate","label","hardness"),
+                              "dst_host_srv_rerror_rate","label"),
                   colClasses=c("label"="character","service"="character", "hardness" = "NULL"))
 println("Generating five kinds of attack labels...")
 data$attack.type <- apply(data, 1, function(a){
@@ -32,14 +32,15 @@ data$attack.type <- as.factor(data$attack.type)
 
 # Predict is normal
 println("Detecting abnormal data...")
-y.is.attack = as.logical(predict(dt.model, data[,feature.selection], type='vector') - 1)
+y.is.attack = knn(x.centers, data.matrix(data[,feature.selection]), y.labels, k=3)
+# y.is.attack = as.logical(predict(dt.model, data[,feature.selection], type='vector') - 1)
 
 # Predict attack type
-println("Classifying abnormal data..")
-y.attack.type = predict(nb.model, data[,feature.selection])
-
-y.hat = y.attack.type
-
-y.hat[y.is.attack == FALSE] = 'normal'
-result = confusionMatrix(y.hat, data[,43])
+# println("Classifying abnormal data..")
+# y.attack.type = predict(nb.model, data[,feature.selection])
+# 
+# y.hat = y.attack.type
+# 
+# y.hat[y.is.attack == FALSE] = 'normal'
+result = confusionMatrix(y.is.attack, data$label!='normal')
 print(result)
