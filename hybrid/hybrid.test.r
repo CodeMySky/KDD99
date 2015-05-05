@@ -1,6 +1,6 @@
 println("Testing...")
 println("Reading test data...")
-real.test.data = read.table("corrected", sep="," ,
+real.test.data = read.table("nsltest.txt", sep="," ,
                   col.names=c("duration","protocol_type","service","flag","src_bytes","dst_bytes",
                               "land","wrong_fragment","urgent","hot","num_failed_logins","logged_in",
                               "num_compromised","root_shell","su_attempted","num_root","num_file_creations",
@@ -11,7 +11,7 @@ real.test.data = read.table("corrected", sep="," ,
                               "dst_host_same_srv_rate","dst_host_diff_srv_rate",
                               "dst_host_same_src_port_rate","dst_host_srv_diff_host_rate",
                               "dst_host_serror_rate","dst_host_srv_serror_rate","dst_host_rerror_rate",
-                              "dst_host_srv_rerror_rate","label"),
+                              "dst_host_srv_rerror_rate","label","hardness"),
                   colClasses=c("label"="character","service"="character", "hardness" = "NULL"))
 println("Generating five kinds of attack labels...")
 real.test.data$attack.type <- apply(real.test.data, 1, function(a){
