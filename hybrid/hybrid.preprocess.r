@@ -15,6 +15,7 @@ library('class')
 library('e1071')
 library('rpart')
 library('caret')
+library('randomForest')
 println("Loading data...")
 data = read.table("nsl20.txt", sep="," ,
                  col.names=c("duration","protocol_type","service","flag","src_bytes","dst_bytes",
@@ -36,6 +37,11 @@ data$is.attack <- apply(data, 1, function(a){
   is.attack = label != 'normal'
 })
 
+data$is.common <- apply(data, 1, function(a){
+  label = a['label']
+  is.common = label %in% c('normal','smurf','neptune')
+})
+
 println("Generating five kinds of attack labels...")
 type.map = list(
   'neptune'='dos','teardrop'='dos','back'='dos','land'='dos','pod'='dos','smurf'='dos',
@@ -55,13 +61,14 @@ data$attack.type <- apply(data, 1, function(a){
   label = a['label']
   label = type.map[[label]]
 })
-for (i in 1:nrow(data)) {
-  label = data[i,'service']
-  index = service.map[[label]]
-  if (is.null(index)) {
-    service.map[[label]] = length(service.map) 
-  }
-  data[i,'service'] = service.map[[label]]
+service.type = levels(as.factor(data$service))
+for (i in 1:length(service.type)) {
+  service.map[[service.type[i]]] = i
 }
+data$service <- apply(data, 1, function(a) {
+  label = a[['service']]
+  label = service.map[[label]]
+})
+#data$is.attack <- as.factor(data$is.attack)
 data$service <- as.numeric(data$service)
 data$attack.type <- as.factor(data$attack.type)
