@@ -1,7 +1,7 @@
 println("Testing...")
 println("Reading test data...")
 
-real.test.data = read.table("nsl20.txt", sep="," ,
+real.test.data = read.table("nsltestfull.txt", sep="," ,
                   col.names=c("duration","protocol_type","service","flag","src_bytes","dst_bytes",
                               "land","wrong_fragment","urgent","hot","num_failed_logins","logged_in",
                               "num_compromised","root_shell","su_attempted","num_root","num_file_creations",
