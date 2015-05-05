@@ -22,14 +22,20 @@ train.attack = train.data[train.data$is.attack == TRUE, feature.selection]
 train.normal = data.matrix(train.normal)
 train.attack = data.matrix(train.attack)
 
-normal.centers = kmeans(train.normal, centers = 1000)$centers
-attack.centers = kmeans(train.attack, centers = 5000)$centers
-y.labels = c(rep(FALSE,dim(normal.centers)[1]), rep(TRUE,dim(attack.centers)[1]))
-x.centers = rbind(normal.centers, attack.centers)
-
-
-y.hat = knn(x.centers, data.matrix(test.data[,feature.selection]), y.labels, k=1)
-print(confusionMatrix(y.hat, test.data$is.attack))
+for (i in c(2,3,4,5,6,7,8,9,10,15,20,50,100,200,500,1000, 1500, 2000)) {
+  normal.centers = kmeans(train.normal, centers = i,iter.max = 10)$centers
+  attack.centers = kmeans(train.attack, centers = 3 * i,iter.max = 10)$centers
+  y.labels = c(rep(FALSE,dim(normal.centers)[1]), rep(TRUE,dim(attack.centers)[1]))
+  x.centers = rbind(normal.centers, attack.centers)
+  
+  
+  #y.hat = knn(x.centers, data.matrix(test.data[,feature.selection]), y.labels, k=1)
+  #result1 = confusionMatrix(y.hat, test.data$is.attack)
+  
+  y.hat = knn(x.centers, data.matrix(real.test.data[,feature.selection]), y.labels, k=1)
+  result2 = confusionMatrix(y.hat, real.test.data$is.attack)
+  print(c(result2$overall[['Accuracy']]))
+}
 
 
 # Second Layer
@@ -47,8 +53,12 @@ print(confusionMatrix(y.hat, test.data$is.attack))
 # 
 # 
 # nb.model <- naiveBayes(attack.type ~ ., data = train.data[c(feature.selection, 44)])
+
+# random.forest.model = randomForest(attack.type ~ ., data=train.data[c(feature.selection, 44)], importance=TRUE, ntree=2000)
+
 # if (is.debug == TRUE) {
 #   y.hat = predict(nb.model, test.data[feature.selection])
 #   print(confusionMatrix(y.hat, test.data[,44]))
 # }
-println('Training finished')
+
+# println('Training finished')
