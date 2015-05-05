@@ -26,19 +26,16 @@ train.attack = train.data[train.data$is.attack == TRUE, feature.selection]
 train.normal = data.matrix(train.normal)
 train.attack = data.matrix(train.attack)
 
-for (i in c(2,3,4,5,6,7,8,9,10,15,20,50,100,200,500,1000, 1500, 2000)) {
-  normal.centers = kmeans(train.normal, centers = i,iter.max = 10)$centers
-  attack.centers = kmeans(train.attack, centers = 3 * i,iter.max = 10)$centers
-  y.labels = c(rep(FALSE,dim(normal.centers)[1]), rep(TRUE,dim(attack.centers)[1]))
-  x.centers = rbind(normal.centers, attack.centers)
-  
-  
-  y.hat = knn(x.centers, data.matrix(test.data[,feature.selection]), y.labels, k=1)
+for (i in c(1, 2, 5, 10, 20, 50, 100, 200, 500,1000, 2000)) {
+  dt.model = rpart(is.attack ~ ., data=train.data[,c(feature.selection,43)], 
+                   method='class', control=rpart.control(minbucket=i))
+  y.hat = predict(dt.model, test.data[,feature.selection],type='class')
+    
   result1 = confusionMatrix(y.hat, test.data$is.attack)
   
-  y.hat = knn(x.centers, data.matrix(real.test.data[,feature.selection]), y.labels, k=1)
+  y.hat =predict(dt.model, real.test.data[,feature.selection],type='class')
   result2 = confusionMatrix(y.hat, real.test.data$is.attack)
-  print(c(i, result1$overall[['Accuracy']], result2$overall[['Accuracy']]))
+  print(c(result2$overall[['Accuracy']]))
 }
 
 
