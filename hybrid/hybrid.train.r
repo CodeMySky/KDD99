@@ -37,8 +37,11 @@ if (is.debug == TRUE) {
 
 
 nb.model <- naiveBayes(attack.type ~ ., data = train.data[c(feature.selection, 44)])
+real.test.data = real.test.data[real.test.data$label != 'normal', ]
 if (is.debug == TRUE) {
   y.hat = predict(nb.model, test.data[feature.selection])
   print(confusionMatrix(y.hat, test.data[,44]))
+  y.hat = predict(nb.model, real.test.data[feature.selection])
+  print(confusionMatrix(y.hat, real.test.data[,44]))
 }
 println('Training finished')
