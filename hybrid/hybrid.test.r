@@ -1,6 +1,6 @@
 println("Testing...")
 println("Reading test data...")
-real.test.data = read.table("nsltestfull.txt", sep="," ,
+real.test.data = read.table("corrected", sep="," ,
                   col.names=c("duration","protocol_type","service","flag","src_bytes","dst_bytes",
                               "land","wrong_fragment","urgent","hot","num_failed_logins","logged_in",
                               "num_compromised","root_shell","su_attempted","num_root","num_file_creations",
@@ -11,11 +11,11 @@ real.test.data = read.table("nsltestfull.txt", sep="," ,
                               "dst_host_same_srv_rate","dst_host_diff_srv_rate",
                               "dst_host_same_src_port_rate","dst_host_srv_diff_host_rate",
                               "dst_host_serror_rate","dst_host_srv_serror_rate","dst_host_rerror_rate",
-                              "dst_host_srv_rerror_rate","label","hardness"),
+                              "dst_host_srv_rerror_rate","label"),
                   colClasses=c("label"="character","service"="character", "hardness" = "NULL"))
 println("Generating five kinds of attack labels...")
 real.test.data$attack.type <- apply(real.test.data, 1, function(a){
-  label = a['label']
+  label = gsub("\\.","",a[['label']])
   label = type.map[[label]]
 })
 real.test.data$is.common <- apply(real.test.data, 1, function(a){
@@ -40,7 +40,10 @@ real.test.data$service <- as.numeric(real.test.data$service)
 real.test.data$attack.type <- as.factor(real.test.data$attack.type)
 
 # Predict is normal
-println("Detecting abnormal data...")
+# println("Detecting abnormal data...")
+
+# y.is.attack = as.logical(predict(dt.model, data[,feature.selection], type='vector') - 1)
+
 
 # print(confusionMatrix(y.is.attack, data$label != 'normal'))
 # Predict attack type
@@ -50,5 +53,8 @@ println("Detecting abnormal data...")
 # y.hat = y.attack.type
 # 
 # y.hat[y.is.attack == FALSE] = 'normal'
+
+# result = confusionMatrix(y.is.attack, data$label!='normal')
+# print(result)
 # result = confusionMatrix(y.hat, data[,43])
 # print(result)

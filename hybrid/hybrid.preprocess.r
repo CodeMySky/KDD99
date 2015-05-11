@@ -17,7 +17,7 @@ library('rpart')
 library('caret')
 library('randomForest')
 println("Loading data...")
-data = read.table("nsl20.txt", sep="," ,
+data = read.table("kddcup.data_10_percent", sep="," ,
                  col.names=c("duration","protocol_type","service","flag","src_bytes","dst_bytes",
                              "land","wrong_fragment","urgent","hot","num_failed_logins","logged_in",
                              "num_compromised","root_shell","su_attempted","num_root","num_file_creations",
@@ -28,7 +28,7 @@ data = read.table("nsl20.txt", sep="," ,
                              "dst_host_same_srv_rate","dst_host_diff_srv_rate",
                              "dst_host_same_src_port_rate","dst_host_srv_diff_host_rate",
                              "dst_host_serror_rate","dst_host_srv_serror_rate","dst_host_rerror_rate",
-                             "dst_host_srv_rerror_rate","label","hardness"),
+                             "dst_host_srv_rerror_rate","label"),
                  colClasses=c("label"="character","service"="character", "hardness" = "NULL"))
 
 println("Generating normal and abnormal label...")
@@ -58,7 +58,7 @@ type.map = list(
 service.map = list()
 
 data$attack.type <- apply(data, 1, function(a){
-  label = a['label']
+  label = gsub("\\.","",a[['label']])
   label = type.map[[label]]
 })
 service.type = levels(as.factor(data$service))
