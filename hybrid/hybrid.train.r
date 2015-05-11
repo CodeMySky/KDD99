@@ -16,6 +16,35 @@ if (is.debug == TRUE)  {
 feature.selection = 1:41
 # First layer, use decision tree to classify is.attack
 
+# train.data = train.data[train.data$label != 'normal', ]
+test.data = test.data[test.data$label != 'normal', ]
+real.test.data = real.test.data[real.test.data$label != 'normal', ]
+random.forest.model = randomForest(attack.type ~ ., data=train.data[c(feature.selection, 45)], importance=TRUE, ntree=200)
+
+if (is.debug == TRUE) {
+  y.hat = predict(random.forest.model, test.data[feature.selection])
+  print(confusionMatrix(y.hat, test.data$attack.type))
+  y.hat = predict(random.forest.model, real.test.data[feature.selection])
+  print(confusionMatrix(y.hat, real.test.data$attack.type))
+}
+println('Training finished')
+# Second Layer
+# println('Training abnormal data classifier...')
+# abnormal.data = data[data$is.attack == TRUE,]
+# 
+# if (is.debug == TRUE) {
+#   train.size <- floor(0.3 * nrow(abnormal.data))
+#   train.index <- sample(seq_len(nrow(abnormal.data)), size = train.size)
+#   train.data <- abnormal.data[train.index, ]
+#   test.data <- abnormal.data[-train.index, ]
+# } else {
+#   train.data = abnormal.data
+# }
+# 
+# 
+# nb.model <- naiveBayes(attack.type ~ ., data = train.data[c(feature.selection, 44)])
+# random.forest.model = randomForest(attack.type ~ ., data=train.data[c(feature.selection, 44)], importance=TRUE, ntree=2000)
+
 println('Training normal/abnormal data classifier...')
 ## Scale does not help to improve accuracy
 # train.data[1:41] = scale(data.matrix(train.data[1:41]))
@@ -64,6 +93,8 @@ println('Training finished')
 # 
 # 
 # nb.model <- naiveBayes(attack.type ~ ., data = train.data[c(feature.selection, 44)])
+
+# random.forest.model = randomForest(attack.type ~ ., data=train.data[c(feature.selection, 44)], importance=TRUE, ntree=2000)
 
 # if (is.debug == TRUE) {
 #   y.hat = predict(nb.model, test.data[feature.selection])
