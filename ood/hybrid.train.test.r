@@ -17,9 +17,11 @@ hybrid.train.test <- function(data.set) {
            },
            random.forest = {
              # Train a random forest
-             binary.classifier = randomForest(is.attack ~ ., data=train.data[c(feature.selection, 43)],
-                                              importance=TRUE, ntree=200, type="class")
-             y.hat = predict(binary.classifier, test.data[feature.selection], type="class")
+             train.data.matrix = data.matrix(train.data)
+             test.data.matrix = data.matrix(test.data)
+             binary.classifier = randomForest(is.attack ~ ., data=train.data.matrix[,c(feature.selection, 43)],
+                                              importance=TRUE, ntree=10, type="class")
+             y.hat = predict(binary.classifier, test.data.matrix[,feature.selection], type="class")
              binary.result = confusionMatrix(y.hat, test.data$is.attack)
            })
   print(type)
