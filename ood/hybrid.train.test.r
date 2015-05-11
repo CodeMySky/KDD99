@@ -17,8 +17,12 @@ hybrid.train.test <- function(data.set) {
            },
            random.forest = {
              # Train a random forest
-             train.data.matrix = data.matrix(train.data)
-             test.data.matrix = data.matrix(test.data)
+             train.data.matrix  <-  train.data
+             train.data.matrix[1:41] <- data.matrix(train.data[1:41])
+             train.data.matrix$is.attack <- as.factor(train.data.matrix$is.attack)
+             test.data.matrix = test.data
+             test.data.matrix[1:41] = data.matrix(test.data[1:41])
+             test.data.matrix$is.attack <- as.factor(test.data.matrix$is.attack)
              binary.classifier = randomForest(is.attack ~ ., data=train.data.matrix[,c(feature.selection, 43)],
                                               importance=TRUE, ntree=10, type="class")
              y.hat = predict(binary.classifier, test.data.matrix[,feature.selection], type="class")
