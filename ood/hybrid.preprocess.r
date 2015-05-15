@@ -2,7 +2,11 @@ hybrid.preprocess <- function (input.file = '') {
   hybrid.preprocess.cleanup()
   hybrid.preprocess.load.libraries()
   data.set = list()
+  # Change training data here
+  #data.set[['training']] <- hybrid.preprocess.load.data("kddcup.data")
   data.set[['training']] <- hybrid.preprocess.load.data("kddcup.data_10_percent")
+  # Change testing data here
+  #data.set[['training']] <- hybrid.preprocess.load.data("nslfull.txt")
   data.set[['testing']] <- hybrid.preprocess.load.data("corrected")
   return(data.set)
 }
