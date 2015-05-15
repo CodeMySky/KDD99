@@ -21,8 +21,8 @@ hybrid.train.test <- function(data.set) {
              # You can adjust minbucket here. min bucket is the smallest bucket of a leaf node in decision tree
              # binary.classifier <- rpart(is.attack ~ ., data=train.data[,c(feature.selection,43)], minbucket = 150)
              binary.classifier <- rpart(is.attack ~ ., data=train.data[,c(feature.selection,43)], minbucket = 50)
-             y.hat <- predict(binary.classifier, test.data[,feature.selection])
-             binary.result <- confusionMatrix(round(y.hat), as.numeric(test.data$is.attack))
+             y.binary.hat <- predict(binary.classifier, test.data[,feature.selection])
+             binary.result <- confusionMatrix(round(y.binary.hat), as.numeric(test.data$is.attack))
            },
            random.forest = {
              # Train a random forest，Accuracy : 0.9258 
@@ -41,8 +41,8 @@ hybrid.train.test <- function(data.set) {
              
              binary.classifier <- randomForest(is.attack ~ ., data=train.data.matrix[,c(feature.selection, 43)],
                                                importance=TRUE, ntree=10, type="class")
-             y.hat <- predict(binary.classifier, test.data.matrix[,feature.selection], type="class")
-             binary.result <- confusionMatrix(y.hat, test.data$is.attack)
+             y.binary.hat <- predict(binary.classifier, test.data.matrix[,feature.selection], type="class")
+             binary.result <- confusionMatrix(y.binary.hat, test.data$is.attack)
            },
            kmeans = {
              # Create template and use KNN to classify data, Accuracy : 0.9228
@@ -67,8 +67,8 @@ hybrid.train.test <- function(data.set) {
              x.centers <- rbind(normal.centers,  attack.centers)
              y.labels <- c(rep(FALSE,dim(normal.centers)[1]),
                            rep(TRUE,dim(attack.centers)[1]))
-             y.hat <- knn(x.centers, data.matrix(test.data[,special.feature.selection]), y.labels, k=1)
-             binary.result <- confusionMatrix(y.hat, test.data$is.attack)
+             y.binary.hat <- knn(x.centers, data.matrix(test.data[,special.feature.selection]), y.labels, k=1)
+             binary.result <- confusionMatrix(y.binary.hat, test.data$is.attack)
            })
   binary.stop.time <- proc.time()
   print(binary.type)
@@ -80,7 +80,7 @@ hybrid.train.test <- function(data.set) {
   # Begin multi-class classification
   println('Training attack type classifier...')
   # You can change the type of classifier here: decision.tree  random.forest  kmeans  naive.bayes
-  multiclass.type <- 'decision.tree'
+  multiclass.type <- 'kmeans'
   train.attack = train.data[train.data$label != 'normal',]
   test.attack = test.data[test.data$label != 'normal',]
   multiclass.start.time <- proc.time()
@@ -91,8 +91,9 @@ hybrid.train.test <- function(data.set) {
              # You can adjust minbucket here. min bucket is the smallest bucket of a leaf node in decision tree
              # multiclass.classifier <- rpart(attack.type ~ ., data=train.attack[,c(feature.selection,45)], minbucket = 50)
              multiclass.classifier <- rpart(attack.type ~ ., data=train.attack[,c(feature.selection,45)], minbucket = 150)
-             y.hat <- predict(multiclass.classifier, test.attack[,feature.selection],type='class')
-             multiclass.result <- confusionMatrix(y.hat, test.attack$attack.type)
+             y.multiclass.hat <- predict(multiclass.classifier, test.attack[,feature.selection],type='class')
+             multiclass.result <- confusionMatrix(y.multiclass.hat, test.attack$attack.type)
+             multiclass.classifier
            },
            random.forest = {
              # Train a random forest, please notice the confusion matrix, Accuracy : 0.9178  
@@ -110,9 +111,10 @@ hybrid.train.test <- function(data.set) {
              #                                   importance=TRUE, ntree=100, type="class")
              multiclass.classifier <- randomForest(attack.type ~ ., data=train.data.matrix[,c(feature.selection, 45)],
                                                    importance=TRUE, ntree=10, type="class")
-             y.hat <- predict(multiclass.classifier, test.data.matrix[,feature.selection], type="class")
-             y.hat <- factor(y.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
-             multiclass.result <- confusionMatrix(y.hat, test.attack$attack.type)
+             y.multiclass.hat <- predict(multiclass.classifier, test.data.matrix[,feature.selection], type="class")
+             y.multiclass.hat <- factor(y.multiclass.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
+             multiclass.result <- confusionMatrix(y.multiclass.hat, test.attack$attack.type)
+             multiclass.classifier
            },
            kmeans = {
              # Create template and use KNN to classify data, Accuracy : 0.7711 
@@ -151,16 +153,17 @@ hybrid.train.test <- function(data.set) {
                                probe.centers,
                                r2l.centers,
                                u2r.centers)
-             y.hat <- knn(x.centers, data.matrix(test.attack[,feature.selection]), y.labels, k=1)
-             y.hat <- factor(y.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
-             multiclass.result <- confusionMatrix(y.hat, test.attack$attack.type)
+             y.multiclass.hat <- knn(x.centers, data.matrix(test.attack[,feature.selection]), y.labels, k=1)
+             y.multiclass.hat <- factor(y.multiclass.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
+             multiclass.result <- confusionMatrix(y.multiclass.hat, test.attack$attack.type)
            },
            naive.bayes = {
              # Build a naive bayes classifier, Accuracy : 0.7575
              multiclass.classifier <- naiveBayes(attack.type ~ ., data = train.attack[,c(feature.selection, 45)])
-             y.hat <- predict(multiclass.classifier, test.attack[,feature.selection], type="class")
-             y.hat <- factor(y.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
-             multiclass.result <- confusionMatrix(y.hat, test.attack$attack.type)
+             y.multiclass.hat <- predict(multiclass.classifier, test.attack[,feature.selection], type="class")
+             y.multiclass.hat <- factor(y.multiclass.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
+             multiclass.result <- confusionMatrix(y.multiclass.hat, test.attack$attack.type)
+             multiclass.classifier
            })
   multiclass.stop.time <- proc.time()
   print(multiclass.type)
@@ -171,4 +174,22 @@ hybrid.train.test <- function(data.set) {
   print(multiclass.stop.time - multiclass.start.time)
   println('Total time used:')
   print(multiclass.stop.time - binary.start.time)
+  println('Doing overall test:')
+  y.hat = as.character(y.binary.hat)
+  if (binary.type == 'decision.tree') {
+    y.hat = round(y.binary.hat)
+    y.hat = as.character(as.logical(y.hat))
+  }
+  if (multiclass.type =='kmeans') {
+    y.multiclass.hat <- knn(x.centers, data.matrix(test.data[,feature.selection]), y.labels, k=1)
+  } else {
+    y.multiclass.hat <- predict(multiclass.classifier, test.data[,feature.selection],type='class')
+  }
+  
+  y.hat[y.hat == 'TRUE'] <- as.character(y.multiclass.hat[y.hat == 'TRUE'])
+  y.hat[y.hat == 'FALSE'] <- 'normal'
+  y.hat = as.factor(y.hat)
+  y.hat <- factor(y.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
+  println("**********  Overall result")
+  print(confusionMatrix(y.hat, test.data$attack.type))
 }
