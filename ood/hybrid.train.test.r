@@ -124,9 +124,12 @@ hybrid.train.test <- function(data.set) {
              #                                   importance=TRUE, ntree=100, type="class")
              multiclass.classifier <- randomForest(attack.type ~ ., data=train.data.matrix[,c(feature.selection, 45)],
                                                    importance=TRUE, ntree=10, type="class")
+             print(importance(multiclass.classifier))
+             varImpPlot(multiclass.classifier)
              y.multiclass.hat <- predict(multiclass.classifier, test.data.matrix[,feature.selection], type="class")
              y.multiclass.hat <- factor(y.multiclass.hat, levels = c("dos","normal","probe", "r2l", "u2r"))
              multiclass.result <- confusionMatrix(y.multiclass.hat, test.data.matrix$attack.type)
+             summary(multiclass.classifier)
              multiclass.classifier
            },
            kmeans = {
@@ -213,6 +216,7 @@ hybrid.train.test <- function(data.set) {
     test.data.matrix <- test.data
     test.data.matrix[1:41] <- data.matrix(test.data[1:41])
     y.multiclass.hat <- predict(multiclass.classifier, test.data.matrix[,feature.selection], type="class")
+    
   } else {
     y.multiclass.hat <- predict(multiclass.classifier, test.data[,feature.selection],type='class')
   }

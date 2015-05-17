@@ -30,6 +30,7 @@ hybrid.preprocess.load.libraries <- function() {
   library('caret')
   library('randomForest')
   library('rattle')
+  library('lattice')
   println("Libraries loaded.")
 }
 
